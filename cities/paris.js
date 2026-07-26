@@ -36,7 +36,7 @@ export const CITY = {
 
   // exactly on the Champs-Élysées centreline, 90 units down from the Étoile,
   // facing Concorde — the avenue runs at 42°, so this has to be computed, not eyeballed
-  start:{x:-263.1, z:-55.8, heading:0.837},
+  start:{x:-271.1, z:-77.8, heading:0.837},
   bounds:{x0:-700, x1:660, z0:-560, z1:600},
 
   districts(x,z){
@@ -244,7 +244,7 @@ export const CITY = {
     // the great places. Paris is organised around these, and every avenue is a
     // chord between two of them.
     const PL={
-      etoile:    {x:-330,z:-116,r:34},
+      etoile:    {x:-338,z:-138,r:34},
       concorde:  {x:-186,z:  30,r:30},
       madeleine: {x:-166,z: -26,r:16},
       opera:     {x:-104,z: -54,r:16},
@@ -450,8 +450,8 @@ export const CITY = {
     }
     const LM=[
       {k:'etoile',    ...PL.etoile,               r:44, name:'ARC DE TRIOMPHE',            s:'ARC'},
-      {k:'champs',    x:-262,z:-56,               r:0,  name:'LES CHAMPS-ÉLYSÉES',         s:'CE'},
-      {k:'grandpalais',...B_(-250, 74,-1,52),     r:34, name:'GRAND PALAIS',               s:'GP'},
+      {k:'champs',    x:-262,z:-56,               r:18, name:'LES CHAMPS-ÉLYSÉES',         s:'CE'},
+      {k:'grandpalais',...B_(-292, 56,-1,50),     r:34, name:'GRAND PALAIS',               s:'GP'},
       {k:'concorde',  ...PL.concorde,             r:34, name:'PLACE DE LA CONCORDE',       s:'CONC'},
       {k:'madeleine', ...PL.madeleine,            r:22, name:'LA MADELEINE',               s:'MAD'},
       {k:'opera',     ...PL.opera,                r:26, name:'OPÉRA GARNIER',              s:'OPÉRA'},
@@ -469,7 +469,7 @@ export const CITY = {
       {k:'orsay',     ...B_(-152,100, 1,40),      r:28, name:"MUSÉE D'ORSAY",              s:'ORSAY'},
       {k:'invalides', ...PL.invalides,            r:40, name:'LES INVALIDES',              s:'INV'},
       {k:'eiffel',    ...B_(-372,-24, 1,62),      r:64, name:'LA TOUR EIFFEL',             s:'EIFFEL'},
-      {k:'trocadero', ...B_(-372,-24,-1,72),      r:40, name:'PALAIS DE CHAILLOT',         s:'TROC'},
+      {k:'trocadero', ...B_(-372,-24,-1,46),      r:36, name:'PALAIS DE CHAILLOT',         s:'TROC'},
       {k:'ecolemil',  ...B_(-372,-24, 1,152),     r:34, name:'ÉCOLE MILITAIRE',            s:'EM'},
       {k:'stgermain', ...B_( -62,124, 1,74),      r:20, name:'SAINT-GERMAIN-DES-PRÉS',     s:'SG'},
       {k:'luxembourg',x:4,  z:212,                r:48, name:'JARDIN DU LUXEMBOURG',       s:'LUX'},
@@ -498,6 +498,15 @@ export const CITY = {
       for(const o of[...LM,...SCENERY])if(surfaceH(o.x,o.z)<3.2)wet.push(o.k+' @'+Math.round(surfaceH(o.x,o.z)));
       for(const k in PL)if(surfaceH(PL[k].x,PL[k].z)<3.2)wet.push('place:'+k+' @'+Math.round(surfaceH(PL[k].x,PL[k].z)));
       console.log('PARIS debug — in the water: '+(wet.length?wet.join(', '):'none'));
+      // Two landmarks whose keep-outs overlap will fight for the same ground and
+      // the HUD will name the wrong one — worth catching numerically.
+      const clash=[];
+      for(let i=0;i<LM.length;i++)for(let j=i+1;j<LM.length;j++){
+        const a=LM[i],b=LM[j];if(!a.r||!b.r)continue;
+        const d=Math.hypot(a.x-b.x,a.z-b.z);
+        if(d<(a.r+b.r)*0.78)clash.push(`${a.k}~${b.k} ${Math.round(d)}<${Math.round(a.r+b.r)}`);
+      }
+      console.log('PARIS debug — landmark clashes: '+(clash.length?clash.join(', '):'none'));
     }
 
     // ======================================================================
